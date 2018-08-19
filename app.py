@@ -11,7 +11,7 @@ app = dash.Dash()
 oTemperature = "Outdoor Temperature"
 iTemperature = "Indoor Temperature"
 df = pd.read_csv("oTemps.csv")
-df2 = pd.read_csv("iTemps.csv")
+#df2 = pd.read_csv("iTemps.csv")
 
 colors = {
     "graphBackground": "#212529",
@@ -54,38 +54,41 @@ app.layout = html.Div(style={"backgroundColor": colors["background"]}, children=
     dcc.DatePickerRange(
         id="date-picker-range",
         start_date=dt.datetime(2018, 5, 22),
+        end_date=dt.datetime.now(),
         min_date_allowed=dt.datetime(2018, 5, 22),
         max_date_allowed=dt.datetime.now(),
         end_date_placeholder_text="Select a date"
     ),
 
     dcc.Graph(
-        id="in-temp-graph")
-#        figure={
-#            "data": [
-#                {"x": df.date, "y": df.temperature, "type": "line", "name": iTemperature}, 
-#            ],
-#            "layout": {
-#                "title": iTemperature,
-#                "plot_bgcolor": colors["graphBackground"],
-#                "paper_bgcolor": colors["graphBackground"]
-#            }
-#        }
-#    )
+        id="in-temp-graph",
+        figure={
+            "data": [
+                {"x": df.date, "y": df.temperature, "type": "line", "name": iTemperature}, 
+            ],
+            "layout": {
+                "title": iTemperature,
+                "plot_bgcolor": colors["graphBackground"],
+                "paper_bgcolor": colors["graphBackground"]
+            }
+        }
+    )
 
 ])
 
 @app.callback(
     Output("in-temp-graph", "figure"),
-    [Input("date-picker-range", "start_date")]
+    [Input("date-picker-range", "start_date"),
+    Input("date-picker-range", "end_date")]
 )
-def update_graph(select_date_value):
-    #dff = df2[df2["date"] == select_date_value]
-    return {
-        "data": [
-            {"x": df2.date, "y": df2.temperature}
-        ]
-    }
+def update_graph(start_date, end_date):
+    df2 = pd.read_csv("iTemps.csv")
+    return start_date, end_date
+#    return {
+#        "data": [
+#            {"x": df2.date, "y": df2.temperature}
+#        ]
+#    }
 
 
 if __name__ == "__main__":
