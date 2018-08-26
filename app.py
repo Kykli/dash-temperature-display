@@ -91,7 +91,7 @@ def update_graph_out(start_date, end_date):
         x = filtered_df.date,
         y = filtered_df.temperature,
         mode = "lines",
-        name = iTemperature
+        name = oTemperature
     )
 
     return {
