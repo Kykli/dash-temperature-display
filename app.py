@@ -9,8 +9,8 @@ import pandas as pd
 
 app = dash.Dash()
 
-oTemperature = "Outdoor Temperature"
-iTemperature = "Indoor Temperature"
+oTemperature = "Outdoor Temperatures"
+iTemperature = "Indoor Temperatures"
 df = pd.read_csv("oTemps.csv")
 df2 = pd.read_csv("iTemps.csv")
 
@@ -34,26 +34,8 @@ app.layout = html.Div(style={"backgroundColor": colors["background"]}, children=
         "color": colors["text"]
     }),
 
-    html.Div(children="", style={
-        "color": colors["background"]
-    }),
-
-    dcc.Graph(
-        id="out-temp-graph",
-        figure={
-            "data": [
-                {"x": df.date, "y": df.temperature, "type": "line", "name": oTemperature}, 
-            ],
-            "layout": {
-                "title": oTemperature,
-                "plot_bgcolor": colors["graphBackground"],
-                "paper_bgcolor": colors["graphBackground"]
-            }
-        }
-    ),
-
     dcc.DatePickerRange(
-        id="date-picker-range",
+        id="date-picker-range-out",
         start_date=dt.datetime(2018, 5, 22),
         end_date=dt.datetime.now(),
         min_date_allowed=dt.datetime(2018, 5, 22),
@@ -61,16 +43,73 @@ app.layout = html.Div(style={"backgroundColor": colors["background"]}, children=
         end_date_placeholder_text="Select a date"
     ),
 
-    dcc.Graph(id="in-temp-graph")
+    dcc.Graph(
+        id="out-temp-graph"
+        ),
+#        figure={
+#           "data": [
+#                {"x": df.date, "y": df.temperature, "type": "line", "name": oTemperature}, 
+#            ],
+#            "layout": {
+#                "title": oTemperature,
+#                "plot_bgcolor": colors["graphBackground"],
+#                "paper_bgcolor": colors["graphBackground"]
+#            }
+#        }
+
+    dcc.DatePickerRange(
+        id="date-picker-range-in",
+        start_date=dt.datetime(2018, 5, 22),
+        end_date=dt.datetime.now(),
+        min_date_allowed=dt.datetime(2018, 5, 22),
+        max_date_allowed=dt.datetime.now(),
+        end_date_placeholder_text="Select a date"
+    ),
+
+    dcc.Graph(
+        id="in-temp-graph"
+        )
 
 ])
 
 @app.callback(
-    Output("in-temp-graph", "figure"),
-    [Input("date-picker-range", "start_date"),
-    Input("date-picker-range", "end_date")]
+    Output("out-temp-graph", "figure"),
+    [Input("date-picker-range-out", "start_date"),
+    Input("date-picker-range-out", "end_date")]
 )
-def update_graph(start_date, end_date):
+def update_graph_out(start_date, end_date):
+    
+    start_date = pd.to_datetime(start_date)
+    end_date = pd.to_datetime(end_date)
+ 
+    filtered_df = df[df.date.between(
+        dt.datetime.strftime(start_date, "%Y-%m-%d"),
+        dt.datetime.strftime(end_date, "%Y-%m-%d")
+    )]
+
+    trace1 = go.Scatter(
+        x = filtered_df.date,
+        y = filtered_df.temperature,
+        mode = "lines",
+        name = iTemperature
+    )
+
+    return {
+        "data": [trace1],
+        "layout": go.Layout(
+            title = oTemperature,
+            plot_bgcolor = colors["graphBackground"],
+            paper_bgcolor = colors["graphBackground"]
+        )
+    }
+
+
+@app.callback(
+    Output("in-temp-graph", "figure"),
+    [Input("date-picker-range-in", "start_date"),
+    Input("date-picker-range-in", "end_date")]
+)
+def update_graph_in(start_date, end_date):
     
     start_date = pd.to_datetime(start_date)
     end_date = pd.to_datetime(end_date)
